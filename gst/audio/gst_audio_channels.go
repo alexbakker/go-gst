@@ -8,6 +8,8 @@ import (
 	"math"
 	"strings"
 	"unsafe"
+
+	"github.com/go-gst/go-glib/glib"
 )
 
 // GetFallbackChannelMask gets the fallback channel-mask for the given number of channels.
@@ -138,4 +140,17 @@ const (
 func (c ChannelPosition) String() string {
 	// ugly hack
 	return strings.TrimSuffix(strings.TrimPrefix(ChannelPositionsToString([]ChannelPosition{c}), "[ "), " ]")
+}
+
+type ChannelPositions glib.ValueArray
+
+var TypeChannelPosition = glib.Type(C.gst_audio_channel_position_get_type())
+
+func (c *ChannelPositions) ToGValue() (*glib.Value, error) {
+	val, err := glib.ValueInit(glib.Type(glib.TYPE_VALUE_ARRAY))
+	if err != nil {
+		return nil, err
+	}
+	val.SetBoxed(unsafe.Pointer(((*glib.ValueArray)(c)).GValueArray))
+	return val, nil
 }
